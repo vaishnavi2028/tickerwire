@@ -1,0 +1,12 @@
+pandas>=2.0
+numpy>=1.24
+requests>=2.31
+python-dotenv>=1.0
+yfinance>=0.2.40
+spacy>=3.7
+rapidfuzz>=3.0
+transformers>=4.38
+torch>=2.1
+nixtla>=0.5
+streamlit>=1.50
+altair>=5.0

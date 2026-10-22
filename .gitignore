@@ -1,0 +1,11 @@
+.env
+__pycache__/
+.pytest_cache/
+.venv/
+venv/
+*.pyc
+.DS_Store
+# generated data (keep the folder, not the files)
+analysis/data/*.csv
+analysis/data/historical_price_data/*.csv
+.streamlit/secrets.toml
