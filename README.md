@@ -14,7 +14,7 @@ headlines   find the   good or     5 years of   7-day       what happens        
 2. **Find the companies.** spaCy's named entity recogniser pulls out organisation names. I fuzzy-match them against the S&P 500 list to get tickers ("Apple" becomes AAPL).
 3. **Score sentiment.** FinBERT, a BERT model fine-tuned on financial text, rates each headline. I average the scores per ticker.
 4. **Get prices.** Five years of daily prices from Yahoo Finance for the tickers worth looking at.
-5. **Forecast.** Nixtla's TimeGPT predicts the next 7 trading days, with 80/90/95% confidence bands. If you don't have a Nixtla key, a simple trend-extension fallback is used instead and the output says so.
+5. **Forecast.** Nixtla's TimeGPT predicts the next 7 trading days, with 80/90/95% confidence bands.
 6. **Epoch analysis.** Finds unusually big one-day moves in a stock's history and averages the price path around them, to see whether big moves tend to keep going or reverse.
 7. **Signal.** BUY needs strongly positive news *and* an upward forecast. SELL needs strongly negative news *and* a downward forecast. Anything else is HOLD. Each BUY/SELL also gets a volatility-based position size and stop-loss / take-profit levels taken from the forecast bands.
 
@@ -88,9 +88,9 @@ python src/backtest.py --hold-days 3 --cost-bps 5 --long-only
 How it works:
 
 - Every pipeline run appends its signals to `analysis/data/signals_history.csv`, so the sample grows the longer you run it.
-- A signal made on day D is entered at the **open of the next trading day**, never at D's close. Using the close would quietly peek at information the signal couldn't have had.
+- A signal made on day D is entered at the **open of the next trading day**, never at D's close.
 - Trades are held for 5 trading days by default, with 10 bps of cost charged on each side.
-- Every trade is compared with SPY over the same window. I also compare against simply buying the same stocks on the same days, because "stocks that were in the news went up" isn't the same claim as "the sentiment signal worked".
+- Every trade is compared with SPY over the same window.I also compare against simply buying the same stocks on the same days as the sentiment signal would have suggested, because "stocks that were in the news went up" is not the same thing as the sentiment signal having worked.
 - Averages come with a bootstrap 95% confidence interval, and the report says so when that interval includes zero.
 - Signals whose exit date hasn't arrived yet are counted separately and left out of the results.
 
@@ -107,15 +107,15 @@ There are 31 tests covering company-name matching, sentiment aggregation, the fo
 
 ## What I changed from the original design
 
-- **Looser default thresholds.** The original design only acts on a sentiment score of 0.98 or above (or 0.02 or below). Since I average scores across headlines, that almost never triggers. I default to 0.70 / 0.30 and made it a flag. You can set it back to 0.98 / 0.02 if you want the strict version.
+- **Looser default thresholds.** The original design only acts on a sentiment score of 0.98 or above (or 0.02 or below). Since I average scores across headlines, that almost never triggers. I default to 0.70 / 0.30 and made it a flag.
 - **A clearer sentiment score.** The score is `(P(positive) - P(negative) + 1) / 2`, so 0.5 means neutral. That way a neutral headline doesn't get mistaken for a negative one.
 - **Nixtla's Python SDK** instead of hand-written REST calls, and a fallback forecast when there's no API key so the pipeline still runs end to end.
 - **API keys in a `.env` file** instead of being pasted into the source.
 - **Position sizing** is simple inverse-volatility: calmer stocks get bigger positions, capped at 10%.
 
-## Limitations (please read these)
+## Limitations
 
-- **The backtest sample is small.** The backtest engine is in place, but with a month of news history it can only score a few dozen trades, which can't separate skill from luck. I haven't run it on a long history, so I'm not making any claims about performance.
+- **The backtest sample is small.** The backtest engine is in place, but with a month of news history it can only score a few dozen trades, which can't separate skill from luck.
 - Headlines are a thin signal. Markets often move before the headline is published, and a headline that mentions a company isn't always about that company.
 - Entity matching is fuzzy and imperfect. "Target" the retailer and "target" the verb look alike, and spaCy's small model misses names in Title Case headlines now and then.
 - Only S&P 500 companies are recognised.
@@ -123,15 +123,12 @@ There are 31 tests covering company-name matching, sentiment aggregation, the fo
 - The fallback forecast just extends the recent trend, so it will almost always agree with whichever way a stock has been moving.
 - The stop-loss and take-profit levels come from forecast confidence bands, which assume more about how prices behave than is really true.
 
-**This is not financial advice.**
-
-## What I'd do next
+## Scope of Future Work
 
 1. Schedule the pipeline to run daily so the signal history grows, then re-run the backtest after a few months.
 2. Check how well the sentiment scores predict next-day returns on their own.
 3. Test different hold periods and thresholds on data I haven't tuned on, to avoid overfitting.
-4. Replace the keyword Q&A with an LLM.
-
+4. Replace the keyword-based "Ask the Data" tab with an LLM, so it can answer free-form questions about the signals.
 ## Credits
 
 Design based on the Stocex capstone (INFO-698). Models: [FinBERT-tone](https://huggingface.co/yiyanghkust/finbert-tone) by Yang et al., [spaCy](https://spacy.io), and [TimeGPT](https://www.nixtla.io) by Nixtla.
