@@ -113,6 +113,12 @@ There are 31 tests covering company-name matching, sentiment aggregation, the fo
 - **API keys in a `.env` file** instead of being pasted into the source.
 - **Position sizing** is simple inverse-volatility: calmer stocks get bigger positions, capped at 10%.
 
+## Dashboard
+<img width="956" height="440" alt="image" src="https://github.com/user-attachments/assets/55236f5e-3a1f-4b67-8514-234f4b687e09" />
+<img width="812" height="220" alt="image" src="https://github.com/user-attachments/assets/eda315f6-0d53-4385-bd22-4bc2b0bf7614" />
+<img width="816" height="419" alt="image" src="https://github.com/user-attachments/assets/a3380ce4-e3c7-4d14-a8ec-f32189864509" />
+<img width="959" height="323" alt="image" src="https://github.com/user-attachments/assets/b0c547bc-d52d-45cf-b45a-649c9a3930e9" />
+
 ## Limitations
 
 - **The backtest sample is small.** The backtest engine is in place, but with a month of news history it can only score a few dozen trades, which can't separate skill from luck.
